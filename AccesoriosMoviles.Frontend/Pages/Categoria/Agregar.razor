@@ -1,0 +1,67 @@
+﻿@page "/categoria/agregar"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService _localStorageService
+
+<MudText Typo="Typo.h2" Class="ml">Nueva Categoria</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <EditForm Model="cat" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                <MudCard>
+                    <MudCardContent>
+                        <MudTextField Label="Nombre" @bind-Value="cat.Nombre" For="@(() => cat.Nombre)" />
+                        <MudDivider />
+                      
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Guardar</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
+            @if (showLeaveAlert)
+            {
+<MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))">No se pudo guardar.</MudAlert>}
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code { bool success;
+            private bool showLeaveAlert = false;
+            Categoria cat = new Categoria();
+
+            protected override async Task OnInitializedAsync()
+            {
+                Http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", await _localStorageService.GetItemAsync<string>("token"));
+            }
+
+            private async Task OnValidSubmit(EditContext context)
+            {
+                await save();
+                success = true;
+                StateHasChanged();
+            }
+
+            private async Task save()
+            {
+
+                var httpResponse = await Http.PostAsJsonAsync<Categoria>("categoria", cat);
+
+                if (!(httpResponse.StatusCode == System.Net.HttpStatusCode.OK))
+                {
+                    showLeaveAlert = true;
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("categoria/index");
+                }
+            }
+
+            private void CloseMe(bool value)
+            {
+                showLeaveAlert = false;
+            } }
+
