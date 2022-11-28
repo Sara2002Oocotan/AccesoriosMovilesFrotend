@@ -1,9 +1,9 @@
-﻿@page "/usuario/agregar"
+﻿@page "/usuario/eliminar/{id:int}"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService _localStorageService
 
-<MudText Typo="Typo.h2" Class="ml">Nuevo Usuario</MudText>
+<MudText Typo="Typo.h2" Class="ml">Eliminar Usuario</MudText>
 
 <MudGrid>
     <MudItem xs="12" sm="7">
@@ -14,15 +14,7 @@
                     <MudCardContent>
                         <MudTextField Label="Nombre" @bind-Value="usuario.Nombre" For="@(() => usuario.Nombre)" />
                         <MudTextField Label="Apellido" @bind-Value="usuario.Apellido" For="@(() => usuario.Apellido)" />
-                        <MudTextField Label="Login" @bind-Value="usuario.Login" For="@(() => usuario.Login)" />
-                        <MudTextField Label="Password" @bind-Value="usuario.Password" For="@(() => usuario.Password)" InputType="InputType.Password" />
-                        <MudTextField Label="ConfirmPassword" @bind-Value="usuario.ConfirmPassword_aux" For="@(() => usuario.ConfirmPassword_aux)" InputType="InputType.Password" />
-                        <MudSelect Variant="Variant.Outlined" Label="Estado" AnchorOrigin="Origin.BottomCenter"
-                                   @bind-Value="usuario.Estatus" For="@(() => usuario.Estatus)">
-                            <MudSelectItem Value="1">Activo</MudSelectItem>
-                            <MudSelectItem Value="2">Inactivo</MudSelectItem>
-
-                        </MudSelect>
+                        <MudTextField Label="Password" @bind-Value="usuario.Password" For="@(() => usuario.Password)" />
                         <MudSelect Variant="Variant.Outlined" Label="Rol" AnchorOrigin="Origin.BottomCenter"
                                    @bind-Value="usuario.IdRol" For="@(() => usuario.IdRol)">
                             @foreach (var item in roles)
@@ -31,39 +23,42 @@
                         </MudSelect>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Guardar</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Error" Class="ml-auto">Eliminar</MudButton>
                     </MudCardActions>
                 </MudCard>
             </EditForm>
             @if (showLeaveAlert)
-
             {
-<MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))">No se pudo guardar.</MudAlert>}
+<MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="(() => CloseMe(true))">Ocurrió un problema.</MudAlert>}
         </MudPaper>
     </MudItem>
 </MudGrid>
 
-@code { private IEnumerable<Rol> roles = new List<Rol>();
+@code { [Parameter]
+            public int id { get; set; }
+
+            private IEnumerable<Rol> roles = new List<Rol>();
             private bool showLeaveAlert = false;
             Usuario usuario = new Usuario();
 
             protected override async Task OnInitializedAsync()
             {
                 Http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", await _localStorageService.GetItemAsync<string>("token"));
+                new AuthenticationHeaderValue("Bearer", await _localStorageService.GetItemAsync<string>("token"));
                 await getRoles();
+
+                var resp = await Http.GetStringAsync("usuario/" + id);
+                usuario = JsonSerializer.Deserialize<Usuario>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
 
             private async Task OnValidSubmit(EditContext context)
             {
-                await save();
+                await eliminar();
             }
 
-
-
-            private async Task save()
+            private async Task eliminar()
             {
-                var httpResponse = await Http.PostAsJsonAsync<Usuario>("usuario", usuario);
+                var httpResponse = await Http.DeleteAsync("usuario/" + usuario.Id);
 
                 if (!(httpResponse.StatusCode == System.Net.HttpStatusCode.OK))
                 {
