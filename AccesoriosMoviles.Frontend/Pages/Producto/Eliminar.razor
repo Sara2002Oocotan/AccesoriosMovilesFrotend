@@ -14,7 +14,7 @@
                     <MudCardContent>
                         <MudTextField Label="Nombre" @bind-Value="producto.Nombre" For="@(() => producto.Nombre)" />
                         <MudTextField Label="Precio" @bind-Value="producto.Precio" For="@(() => producto.Precio)" />
-                        <MudSelect Variant="Variant.Outlined" Label="Departamento" AnchorOrigin="Origin.BottomCenter"
+                        <MudSelect Variant="Variant.Outlined" Label="Producto" AnchorOrigin="Origin.BottomCenter"
                                    @bind-Value="producto.IdCategoria" For="@(() => producto.IdCategoria)">
                             @foreach (var item in categorias)
                             {
