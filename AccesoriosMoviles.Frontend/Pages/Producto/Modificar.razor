@@ -78,6 +78,6 @@
 
     private async Task getCategorias()
     {
-        var httpResponse = await Http.GetStringAsync("departamento");
+        var httpResponse = await Http.GetStringAsync("categoria");
         categorias = JsonSerializer.Deserialize<IEnumerable<Categoria>>(httpResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     } }
